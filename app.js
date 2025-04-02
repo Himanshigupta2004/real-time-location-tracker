@@ -1,23 +1,42 @@
-const express=require("express");
-const http=require("http");
-const app=express();
-const socketio=require("socket.io");
-const path=require("path");
+const express = require("express");
+const http = require("http");
+const path = require("path");
+const socketio = require("socket.io");
+
+const app = express();
 const server = http.createServer(app);
-const io= socketio(server);
+const io = socketio(server);
 
-app.set("view engine","ejs");
-app.set(express.static(path.join(__dirname,"public")));
-app.use('/style', express.static(path.join(__dirname, 'public/style')));
+// Set EJS as the view engine
+app.set("view engine", "ejs");
 
-app.use('/javascripts', express.static(path.join(__dirname, 'public/javascripts')));
-io.on("connection",function(socket){
-    console.log("connected to socket");
-})
-app.get("/",function(req,res){
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/style", express.static(path.join(__dirname, "public/style")));
+app.use("/javascripts", express.static(path.join(__dirname, "public/javascripts")));
+
+// Handle WebSocket connections
+io.on("connection", function (socket) {
+    console.log(`User connected: ${socket.id}`);
+
+    // Listen for location updates
+    socket.on("send-location", function (data) {
+        console.log(`User ${socket.id} sent location:`,data.latitude, data.longitude);
+        io.emit("recieved-location", { id: socket.id, ...data });
+    });
+
+    // Handle user disconnection
+    socket.on("disconnect", function () {
+        console.log(`User disconnected: ${socket.id}`);
+        io.emit("user-disconnected", socket.id);
+    });
+});
+
+
+app.get("/", function (req, res) {
     res.render("index");
 });
 
-server.listen(3000);
-
-
+server.listen(3000, () => {
+    console.log("Server running on http://localhost:3000");
+});
