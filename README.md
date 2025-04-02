@@ -18,7 +18,7 @@ This project is a **real-time location tracking application** built using **Node
 ## Installation & Setup
 ### 1️⃣ Clone the Repository
 ```bash
-git clone 
+git clone https://github.com/Himanshigupta2004/real-time-location-tracker.git
 cd real-time-location-tracker
 ```
 
